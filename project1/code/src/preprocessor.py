@@ -21,6 +21,7 @@ class ProcessedData:
     elementCount = elems.__len__()
     print(elems)
     
+    #gets the column number for the class signifier
     columnNum: int
     code = 0
     while code == 0:
@@ -34,16 +35,44 @@ class ProcessedData:
       else:
         print("Not a valid number")
     
+    #flags each column as categorical, quantitative, or as the class signifier
+    columnCodes = []
     x = 0
     while x < elementCount:
-      
+      x += 1
+      if x == columnNum:
+        columnCodes.append(3)
+      else:
+        inputValue = input("Is this data (cat)egorical or (quant)itative > ")
+        code = 0
+        while code == 0:
+          if inputValue == "cat":
+            columnCodes.append(1)
+            code = 1
+            pass
+          elif inputValue == "quant":
+            columnCodes.append(2)
+            code = 1
+            pass
+          else:
+            inputValue = input("Invalid entry. Please try again > ")
+    #checks the validity of the flagging process
+    if columnCodes.__len__() != elementCount:
+      print("Error in processing file. Expected number of columns is " + elementCount + " and number flagged is " + columnCodes.__len__())
+      exit
+    
+    #for each categorical and class column, we initiailize a set, and for each quantitative column, we initialize a list
+    columnDataList = []
+    x = 0
+    while x < elementCount:
+      if columnCodes(x) == 1:
+        columnDataList.append()
+      elif columnCodes(x) == 2 or columnCodes(x) == 3:
+        pass
+      else:
+        pass
       x += 1
 
-#ask for a file name without extension
-#check if there is a .pdata file present for the dataset
-#ask for number of columns
-#ask which column is the class
-#for each other column ask for quantitative or qualitative
 #process data in the file
 #shuffle data
 #print it to a file in ./data/ with extension .pdata
