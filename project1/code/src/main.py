@@ -1,5 +1,9 @@
-import preprocessor
+import preprocessor as prpr
 import trainer as tr
+import kfxv
 
-classifer = tr.Classifier()
-classifer.train()
+selection = input("Please select a .data or .pdata file for training > ")
+testData = prpr.ProcessedData(selection)
+validationTable = kfxv.crossvalidation(testData)
+for row in validationTable:
+  print(row)
