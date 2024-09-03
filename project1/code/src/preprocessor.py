@@ -3,13 +3,13 @@ import random
 import copy
 
 class ProcessedData:
-  numberOfClasses = 0
-  numberOfExamples = 0
-  vectorLength = 0
-  vectorList = list[list[int]]()
-  subvectorLengths = list[int]()
-  
   def __init__(self, filename : str) -> None:
+    self.numberOfClasses = 0
+    self.numberOfExamples = 0
+    self.vectorLength = 0
+    self.vectorList = list[list[int]]()
+    self.subvectorLengths = list[int]()
+    
     pdata = False
     if filename == "__DEFAULT__":
       return
@@ -209,7 +209,7 @@ class ProcessedData:
       if code == 1: #categorical values will get binned based on the string value
         subvectorLength = len(columnEncoder[x])
         for y in range(0, len(columnDataList[x])):
-          subvector = [None] * subvectorLength
+          subvector = [0] * subvectorLength
           subvector[columnEncoder[x].index(columnDataList[x][y])] = 1
           self.vectorList[y].extend(subvector)
           pass
@@ -232,16 +232,17 @@ class ProcessedData:
   def shuffleVectors(self):
     random.shuffle(self.vectorList)
 
-def shuffleElements(data : ProcessedData) -> ProcessedData:
+def shuffleElements(data : ProcessedData, factor : float) -> ProcessedData:
   #initialize the new data and copy over everything from the data
   newData = ProcessedData("__DEFAULT__")
   newData.subvectorLengths = copy.copy(data.subvectorLengths)
   newData.numberOfExamples = data.numberOfExamples
   newData.vectorList = copy.deepcopy(data.vectorList)
   newData.numberOfClasses = data.numberOfClasses
+  newData.vectorLength = data.vectorLength
   #apply the shuffling algorithm
   numberofattributes = len(data.subvectorLengths) - 1
-  numberofshuffles = int(newData.numberOfExamples * numberofattributes * 0.10)
+  numberofshuffles = int(newData.numberOfExamples * numberofattributes * factor)
   for count in range(0, numberofshuffles):
     vectors = random.choices(newData.vectorList, k = 2)
     svlIndex = random.randint(0, numberofattributes - 1)

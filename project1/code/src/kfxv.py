@@ -12,7 +12,7 @@ def kfold(data : prpr.ProcessedData, k : int) -> list[prpr.ProcessedData]:
   splitVectorList = copy.deepcopy(data.vectorList)
   splitVectorList = np.array_split(splitVectorList, k)
   for x in range(0, k):
-    chunk = prpr.blankData()
+    chunk = prpr.ProcessedData("__DEFAULT__")
     chunk.numberOfExamples = len(splitVectorList[x])
     chunk.vectorLength = data.vectorLength
     chunk.subvectorLengths = copy.copy(data.subvectorLengths)
@@ -24,7 +24,7 @@ def kfold(data : prpr.ProcessedData, k : int) -> list[prpr.ProcessedData]:
 def crossvalidation(data : prpr.ProcessedData) -> list[list[int]]:
   validationTable = [([0] * data.numberOfClasses) for _ in range(data.numberOfClasses)]
   cleanDataList = tenfold(data)
-  for x in range(10):
+  for x in range(0, 10):
     dataList = copy.copy(cleanDataList)
     testData = dataList.pop(x)
     trainingData = mergedata(dataList)
@@ -32,11 +32,11 @@ def crossvalidation(data : prpr.ProcessedData) -> list[list[int]]:
     for vector in testData.vectorList:
       actualClass = vector[-1]
       predictedClass = classifier.classify(vector)
-      validationTable[actualClass][predictedClass] += 1
+      validationTable[predictedClass][actualClass] += 1
   return validationTable
 
 def mergedata(dataList : list[prpr.ProcessedData]) -> prpr.ProcessedData:
-  totalData = prpr.blankData()
+  totalData = prpr.ProcessedData("__DEFAULT__")
   totalData.vectorLength = dataList[0].vectorLength
   totalData.numberOfClasses = dataList[0].numberOfClasses
   totalData.subvectorLengths = dataList[0].subvectorLengths

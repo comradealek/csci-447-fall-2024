@@ -1,10 +1,9 @@
 import preprocessor as prpr
 
 class Classifier:
-  table = []
-  d = 0
-  
   def __init__(self, data : prpr.ProcessedData) -> None:
+    self.table = []
+    self.d = 0
     self.train(data)
   
   def train(self, data : prpr.ProcessedData):
@@ -21,7 +20,11 @@ class Classifier:
       self.table[vectorclass][0] += 1
       for y in range(0, len(vector) - 1):
         attribute = vector[y]
-        self.table[vectorclass][y + 1][attribute] += 1
+        try:
+          self.table[vectorclass][y + 1][attribute] += 1
+        except:
+          print(str(x) + " " + str(y))
+          print(self.table[vectorclass])
     
     for x in range(0, len(self.table)):
       C = self.table[x][0]
