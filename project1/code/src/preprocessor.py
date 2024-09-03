@@ -3,12 +3,14 @@ import random
 import copy
 
 class ProcessedData:
-  def __init__(self, filename : str) -> None:
+  def __init__(self, filename : str):
     self.numberOfClasses = 0
     self.numberOfExamples = 0
     self.vectorLength = 0
     self.vectorList = list[list[int]]()
     self.subvectorLengths = list[int]()
+    self.errorcode = 0
+    self.classNames = []
     
     pdata = False
     if filename == "__DEFAULT__":
@@ -24,6 +26,8 @@ class ProcessedData:
         data_file = open("./data/" + filename + ".data", "r")
       except:
         print("failed to open file with name \"" + filename + "\"")
+        self.errorcode = 1
+        return
     if pdata:
       self.loadpdata(data_file)
     else:
@@ -110,17 +114,18 @@ class ProcessedData:
       if x == classColumnNum - 1:
         columnCodes.append(2)
       else:
-        inputValue = input("Is column " + str(x + 1) + " (c)ategorical or (q)uantitative > ")
+        inputValue = input("Is column " + str(x + 1) + " (c)ategorical, (q)uantitative, or (i)gnored > ")
         code = 0
         while code == 0:
           if inputValue == "c":
             columnCodes.append(1)
             code = 1
-            pass
           elif inputValue == "q":
             columnCodes.append(0)
             code = 1
-            pass
+          elif inputValue == "i":
+            columnCodes.append(-1)
+            code = 1
           else:
             inputValue = input("Invalid entry. Please try again > ")
     #checks the validity of the flagging process
@@ -134,7 +139,8 @@ class ProcessedData:
     #for each column we initialize a list
     columnDataList = list[list]()
     for x in range(0, elementCount):
-      columnDataList.append(list[str]())
+      if columnCodes[x] != -1:
+        columnDataList.append(list[str]())
     
     #iterate through file line by line and add the elements to our data collections
     for line in file:
@@ -142,9 +148,14 @@ class ProcessedData:
       elems = line.split(",")
       
       x = 0
-      for st in elems:
-        columnDataList[x].append(st)
-        x += 1
+      y = 0
+      for code in columnCodes:
+        if code != -1:
+          columnDataList[x].append(elems[y])
+          x += 1
+        else:
+          pass
+        y += 1
     
     #verify the lists are the same length
     prev = 0
@@ -160,8 +171,8 @@ class ProcessedData:
     
     #process the data
     columnEncoder = list[list]()
-    for x in range(0, elementCount):
-      code = columnCodes[x]
+    x = 0
+    for code in columnCodes:
       if code == 0:
         sublist : list[str] = columnDataList[x]
         numlist = list[float]()
@@ -180,17 +191,20 @@ class ProcessedData:
         for index in missingValueIndices:
           numlist.insert(index, sortedlist[thirdquartile])
         columnDataList[x] = numlist
+        x += 1
       elif code == 1 or code == 2:
         sublist = columnDataList[x]
         strset = set(sublist)
         columnEncoder.append(list(strset))
+        x += 1
+      elif code == -1:
+        pass
     
     self.vectorList = [[] for _ in range(len(columnDataList[0]))]
     #use the columnEncoder to turn the data in the columDataList lists into feature vectors
-    for x in range(0, elementCount):
-      code = columnCodes[x]
+    x = 0
+    for code in columnCodes:
       if code == 0: #continuous values will get binned based on quartile
-        subvectorLength = 0
         for y in range(0, len(columnDataList[x])):
           subvectorLength = 3
           subvector = [0] * subvectorLength
@@ -205,6 +219,8 @@ class ProcessedData:
             pass
           self.vectorList[y].extend(subvector)
           pass
+          self.subvectorLengths.append(subvectorLength)
+        x += 1
         pass
       if code == 1: #categorical values will get binned based on the string value
         subvectorLength = len(columnEncoder[x])
@@ -212,20 +228,26 @@ class ProcessedData:
           subvector = [0] * subvectorLength
           subvector[columnEncoder[x].index(columnDataList[x][y])] = 1
           self.vectorList[y].extend(subvector)
+          self.subvectorLengths.append(subvectorLength)
           pass
+        x += 1
         pass
       if code == 2:
-        subvectorLength = 1
         self.numberOfClasses = len(columnEncoder[x])
         #we're going to skip the class column and save it for when everything else is encoded
+        x += 1
         pass
-      self.subvectorLengths.append(subvectorLength)
+      if code == -1:
+        pass
     
+    #this is where we assign values to the class column
+    x = classColumnNum - (columnCodes.count(-1) + 1)
     for y in range(0, len(columnDataList[0])):
-      x = classColumnNum - 1
       self.vectorList[y].append(columnEncoder[x].index(columnDataList[x][y]))
       pass
-    
+    self.subvectorLengths.append(1)
+    self.classNames = columnEncoder[x]
+
     self.numberOfExamples = len(self.vectorList)
     pass
   

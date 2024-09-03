@@ -46,3 +46,7 @@ class Classifier:
       if classestimates[x] > classestimates[classification]:
         classification = x
     return classification
+  
+  def printTable(self):
+    for row in self.table:
+      print(row)

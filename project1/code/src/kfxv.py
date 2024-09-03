@@ -22,9 +22,10 @@ def kfold(data : prpr.ProcessedData, k : int) -> list[prpr.ProcessedData]:
   return dataList
 
 def crossvalidation(data : prpr.ProcessedData) -> list[list[int]]:
+  k = 10
   validationTable = [([0] * data.numberOfClasses) for _ in range(data.numberOfClasses)]
-  cleanDataList = tenfold(data)
-  for x in range(0, 10):
+  cleanDataList = kfold(data, k)
+  for x in range(0, k):
     dataList = copy.copy(cleanDataList)
     testData = dataList.pop(x)
     trainingData = mergedata(dataList)
