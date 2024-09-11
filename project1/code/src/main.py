@@ -66,10 +66,10 @@ def fulltest():
     noisefmeasurelist[i] = ev.macroFmeasure(noisetable)
   
   #Create the bar chart
-  printBarChart(namelist, precisionlist, noiseprecisionlist)
-  printBarChart(namelist, recalllist, noiserecalllist)
-  printBarChart(namelist, zeroonelist, noisezeroonelist)
-  printBarChart(namelist, fmeasurelist, noisefmeasurelist)
+  printBarChart(namelist, zeroonelist, noisezeroonelist, title="0-1 Loss")
+  printBarChart(namelist, precisionlist, noiseprecisionlist, title="Precision")
+  printBarChart(namelist, recalllist, noiserecalllist, title="Recall")
+  printBarChart(namelist, fmeasurelist, noisefmeasurelist, "F Measure")
   return
 
 code = 0
