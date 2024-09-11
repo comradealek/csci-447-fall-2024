@@ -70,3 +70,9 @@ def macroFmeasure(table : list[list[int]]) -> float:
   else:
     fmeasure = 2 * (precision * recall) / (precision + recall)
   return fmeasure
+
+def printMetrics(table : list[list[int]]):
+  print(f'{"Precision:":11} {macroPrecision(table)}')
+  print(f'{"Recall:":11} {macroRecall(table)}')
+  print(f'{"Zero-One:":11} {zeroOneLoss(table)}')
+  print(f'{"F Measure:":11} {macroFmeasure(table)}')

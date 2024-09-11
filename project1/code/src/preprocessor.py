@@ -10,13 +10,14 @@ class ProcessedData:
     self.vectorList = list[list[int]]()
     self.subvectorLengths = list[int]()
     self.errorcode = 0
-    self.classNames = []
+    self.classNames = list[str]()
     
     pdata = False
     if filename == "__DEFAULT__":
       return
     try:
       data_file = open("./data/" + filename + ".pdata", "r")
+
       select = input("Preprocessed data file found. Use it? y / n > ")
       if select == "n":
         raise
@@ -43,6 +44,10 @@ class ProcessedData:
   def writetofile(self, path):
     f = open(path, "w")
     #copy the subvector data
+    f.write(str(self.classNames[0]))
+    for x in range(1, len(self.classNames)):
+      f.write("," + str(self.classNames[x]))
+    f.write("\n")
     f.write(str(self.subvectorLengths[0]))
     for x in range(1, len(self.subvectorLengths)):
       f.write("," + str(self.subvectorLengths[x]))
@@ -57,15 +62,22 @@ class ProcessedData:
     pass
   
   def loadpdata(self, file: io.TextIOWrapper):
+    #get the class names
     line = file.readline()
     line = line.strip()
     elems = line.split(',')
+    for elem in elems:
+      self.classNames.append(elem)
     #get the subvector lengths
+    line = file.readline()
+    line = line.strip()
+    elems = line.split(',')
     for elem in elems:
       try:
         self.subvectorLengths.append(int(elem))
       except:
         print("Formatting error in file. Aborting")
+        self.errorcode = 1
         return
     #get the rest of the data
     for line in file:
@@ -77,6 +89,7 @@ class ProcessedData:
           vector.append(int(elem))
         except:
           print("Formatting error in file. Aborting")
+          self.errorcode = 1
           return
         pass
       self.vectorList.append(vector)
@@ -84,6 +97,7 @@ class ProcessedData:
     for vector in self.vectorList:
       if vector[-1] + 1 > self.numberOfClasses:
         self.numberOfClasses = vector[-1] + 1
+    self.vectorLength = len(self.vectorList[0])
     pass
   
   def processfile(self, file: io.TextIOWrapper):
@@ -195,7 +209,9 @@ class ProcessedData:
       elif code == 1 or code == 2:
         sublist = columnDataList[x]
         strset = set(sublist)
-        columnEncoder.append(list(strset))
+        strlist = list(strset)
+        strlist = sorted(strlist)
+        columnEncoder.append(strlist)
         x += 1
       elif code == -1:
         pass
@@ -219,7 +235,7 @@ class ProcessedData:
             pass
           self.vectorList[y].extend(subvector)
           pass
-          self.subvectorLengths.append(subvectorLength)
+        self.subvectorLengths.append(subvectorLength)
         x += 1
         pass
       if code == 1: #categorical values will get binned based on the string value
@@ -228,8 +244,8 @@ class ProcessedData:
           subvector = [0] * subvectorLength
           subvector[columnEncoder[x].index(columnDataList[x][y])] = 1
           self.vectorList[y].extend(subvector)
-          self.subvectorLengths.append(subvectorLength)
           pass
+        self.subvectorLengths.append(subvectorLength)
         x += 1
         pass
       if code == 2:
