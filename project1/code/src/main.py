@@ -31,6 +31,8 @@ def printBarChart(labels, data, noisedata, title=None):
   plt.title(title)
   plt.legend(["clean", "noisy"])
   plt.xlabel("Data Sets")
+  plt.ylim([0, 1])
+  plt.rcParams["figure.figsize"] = (8, 6)
   #plt.xkcd()
   plt.show()
 
@@ -42,7 +44,7 @@ def fulltest():
 
   columnCodeList = [
     [-1] + [0 for _ in range(9)] + [2],
-    [-1] + [0 for _ in range(9)] + [2],
+    [-1] + [0 for _ in range(5)] + [-1, -1] + [0, 0] + [2],
     [2] + [1 for _ in range(16)],
     [0 for _ in range(4)] + [2],
     [1 for _ in range(10)] + [-1, 1] + [-1 for _ in range(7)] + [1 for _ in range(9)] + [-1 for _ in range(6)] + [1, 2]
@@ -83,6 +85,10 @@ def fulltest():
     print("Results for " + namelist[i] + ":")
     kfxv.printTable(data, table)
     ev.printMetrics(table)
+    print()
+    print("Results for noise modified " + namelist[i] + ":")
+    kfxv.printTable(noisedata, noisetable)
+    ev.printMetrics(noisetable)
     print()
 
     precisionlist[i] = ev.macroPrecision(table)

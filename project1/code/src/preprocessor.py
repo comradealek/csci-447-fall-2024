@@ -287,6 +287,7 @@ def shuffleElements(data : ProcessedData, factor : float) -> ProcessedData:
   newData.vectorList = copy.deepcopy(data.vectorList)
   newData.numberOfClasses = data.numberOfClasses
   newData.vectorLength = data.vectorLength
+  newData.classNames = copy.copy(data.classNames)
   #apply the shuffling algorithm
   numberofattributes = len(data.subvectorLengths) - 1
   numberofshuffles = int(newData.numberOfExamples * numberofattributes * factor)

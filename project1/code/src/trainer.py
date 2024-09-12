@@ -65,4 +65,11 @@ class Classifier:
 
   def printTable(self):
     for row in self.table:
-      print(row)
+      printstr = f'[{row[0]:.3f}, '
+      for i in range(1, len(row)):
+        printstr += f'[{row[i][0]:.3f}, '
+        printstr += f'{row[i][1]:.3f}]'
+        if (i + 1) < len(row):
+          printstr += ", "
+      printstr += "]"
+      print(printstr)
