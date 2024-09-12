@@ -100,7 +100,7 @@ class ProcessedData:
     self.vectorLength = len(self.vectorList[0])
     pass
   
-  def processfile(self, file: io.TextIOWrapper):
+  def processfile(self, file: io.TextIOWrapper, classColumnNum = None, columnCodes = None, missingAttribFlag = None):
     #extract the column count from the data file
     line = str(file.readline())
     line = line.strip()
@@ -109,46 +109,49 @@ class ProcessedData:
     file.seek(0)
     
     #gets the column number for the class signifier
-    classColumnNum: int
-    code = 0
-    while code == 0:
-      inputNum = input("Which column corresponds to the class? > ")
-      if inputNum.isdigit():
-        classColumnNum = int(inputNum)
-        if classColumnNum > elementCount:
-          print("Out of range")
+    if classColumnNum == None:
+      code = 0
+      while code == 0:
+        inputNum = input("Which column corresponds to the class? > ")
+        if inputNum.isdigit():
+          classColumnNum = int(inputNum)
+          if classColumnNum > elementCount:
+            print("Out of range")
+          else:
+            code = 1
         else:
-          code = 1
-      else:
-        print("Not a valid number")
+          print("Not a valid number")
     
     #flags each column as categorical, quantitative, or as the class signifier
-    columnCodes = list[int]()
-    for x in range(0, elementCount):
-      if x == classColumnNum - 1:
-        columnCodes.append(2)
-      else:
-        inputValue = input("Is column " + str(x + 1) + " (c)ategorical, (q)uantitative, or (i)gnored > ")
-        code = 0
-        while code == 0:
-          if inputValue == "c":
-            columnCodes.append(1)
-            code = 1
-          elif inputValue == "q":
-            columnCodes.append(0)
-            code = 1
-          elif inputValue == "i":
-            columnCodes.append(-1)
-            code = 1
-          else:
-            inputValue = input("Invalid entry. Please try again > ")
-    #checks the validity of the flagging process
-    if len(columnCodes) != elementCount:
-      print("Error in processing file. Expected number of columns is " + str(elementCount) + " and number flagged is " + str(len(columnCodes)))
-      exit
+    #-1 is for ignored columns, 0 is for continuous data, 1 is for categories, and 2 is for the class
+    while columnCodes == None:
+      columnCodes = list[int]()
+      for x in range(0, elementCount):
+        if x == classColumnNum - 1:
+          columnCodes.append(2)
+        else:
+          inputValue = input("Is column " + str(x + 1) + " (c)ategorical, (q)uantitative, or (i)gnored > ")
+          code = 0
+          while code == 0:
+            if inputValue == "c":
+              columnCodes.append(1)
+              code = 1
+            elif inputValue == "q":
+              columnCodes.append(0)
+              code = 1
+            elif inputValue == "i":
+              columnCodes.append(-1)
+              code = 1
+            else:
+              inputValue = input("Invalid entry. Please try again > ")
+      #checks the validity of the flagging process
+      if len(columnCodes) != elementCount:
+        print("Error in processing file. Expected number of columns is " + str(elementCount) + " and number flagged is " + str(len(columnCodes)))
+        columnCodes = None
     
     #ask for the missing attribute indicator
-    missingAttribFlag = input("Please enter the flag for missing attributes > ")
+    if missingAttribFlag == None:
+      missingAttribFlag = input("Please enter the flag for missing attributes > ")
     
     #for each column we initialize a list
     columnDataList = list[list]()
@@ -200,10 +203,12 @@ class ProcessedData:
         sortedlist = sorted(numlist)
         length = len(sortedlist)
         firstquartile = int(length * 0.25)
+        median = int(length * 0.5)
         thirdquartile = int(length * 0.75)
-        columnEncoder.append(list([sortedlist[firstquartile], sortedlist[thirdquartile]]))
+        quartilelist = list([sortedlist[firstquartile], sortedlist[median], sortedlist[thirdquartile], sortedlist[-1]])
+        columnEncoder.append(quartilelist)
         for index in missingValueIndices:
-          numlist.insert(index, sortedlist[thirdquartile])
+          numlist.insert(index, random.choice(quartilelist))
         columnDataList[x] = numlist
         x += 1
       elif code == 1 or code == 2:
@@ -222,7 +227,7 @@ class ProcessedData:
     for code in columnCodes:
       if code == 0: #continuous values will get binned based on quartile
         for y in range(0, len(columnDataList[x])):
-          subvectorLength = 3
+          subvectorLength = 4
           subvector = [0] * subvectorLength
           if columnDataList[x][y] <= columnEncoder[x][0]:
             subvector[0] = 1
@@ -230,8 +235,11 @@ class ProcessedData:
           elif columnDataList[x][y] <= columnEncoder[x][1]:
             subvector[1] = 1
             pass
-          else:
+          elif columnDataList[x][y] <= columnEncoder[x][2]:
             subvector[2] = 1
+            pass
+          else:
+            subvector[3] = 1
             pass
           self.vectorList[y].extend(subvector)
           pass
@@ -265,6 +273,7 @@ class ProcessedData:
     self.classNames = columnEncoder[x]
 
     self.numberOfExamples = len(self.vectorList)
+    self.vectorLength = len(self.vectorList[0])
     pass
   
   def shuffleVectors(self):

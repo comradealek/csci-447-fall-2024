@@ -36,6 +36,26 @@ def printBarChart(labels, data, noisedata, title=None):
 
 def fulltest():
   namelist = ["breast-cancer-wisconsin", "glass", "house-votes-84", "iris", "soybean-small"]
+  
+  #bunch of stuff for auto processing the data files
+  classColumnList = [11, 11, 1, 5, 36]
+
+  columnCodeList = [
+    [-1] + [0 for _ in range(9)] + [2],
+    [-1] + [0 for _ in range(9)] + [2],
+    [2] + [1 for _ in range(16)],
+    [0 for _ in range(4)] + [2],
+    [1 for _ in range(10)] + [-1, 1] + [-1 for _ in range(7)] + [1 for _ in range(9)] + [-1 for _ in range(6)] + [1, 2]
+  ]
+
+  missingAttribList = [
+    "?",
+    "",
+    "",
+    "",
+    ""
+  ]
+  
   precisionlist = [0.0 for _ in range(len(namelist))]
   recalllist =    [0.0 for _ in range(len(namelist))]
   zeroonelist =   [0.0 for _ in range(len(namelist))]
@@ -46,15 +66,24 @@ def fulltest():
   noisefmeasurelist =  [0.0 for _ in range(len(namelist))]
   for i in range(len(namelist)):
     data = prpr.blankData()
-    data.loadpdata(open("./data/" + namelist[i] + ".pdata", "r"))
+    try:
+      data.loadpdata(open("./data/" + namelist[i] + ".pdata", "r"))
+    except:
+      data.processfile(
+        open("./data/" + namelist[i] + ".data", "r"), 
+        classColumnNum=classColumnList[i], 
+        columnCodes=columnCodeList[i], 
+        missingAttribFlag=missingAttribList[i]
+      )
+      data.writetofile(namelist[i] + ".pdata")
     noisedata = prpr.shuffleElements(data, 0.10)
     table = kfxv.crossvalidation(data)
     noisetable = kfxv.crossvalidation(noisedata)
 
-    """ print("Results for " + namelist[i] + ":")
+    print("Results for " + namelist[i] + ":")
     kfxv.printTable(data, table)
     ev.printMetrics(table)
-    print() """
+    print()
 
     precisionlist[i] = ev.macroPrecision(table)
     noiseprecisionlist[i] = ev.macroPrecision(noisetable)

@@ -8,7 +8,7 @@ def zeroOneLoss(table : list[list[int]]) -> float:
         if x == y:
           h += table[x][y]
         n += table[x][y]
-    loss = h / n
+    loss = (n - h) / n
   except:
     loss = -1
   return loss
