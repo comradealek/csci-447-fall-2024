@@ -31,7 +31,7 @@ def printBarChart(labels, data, noisedata, title=None):
   plt.title(title)
   plt.legend(["clean", "noisy"])
   plt.xlabel("Data Sets")
-  plt.ylim([0, 1])
+  #plt.xkcd()
   plt.show()
 
 def fulltest():
