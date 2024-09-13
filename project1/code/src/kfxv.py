@@ -4,10 +4,15 @@ import numpy as np
 import trainer as tr
 import random
 
-def tenfold(data : prpr.ProcessedData) -> list[prpr.ProcessedData]:
-  return kfold(data, 10)
-
 def kfold(data : prpr.ProcessedData, k : int, debug = False) -> list[prpr.ProcessedData]:
+  """
+  generates an arbitrary number of folds 
+  
+  :param data:
+      the data to be broken into folds
+  :param k:
+      the number of folds
+  """
   dataList = []
   vectors = copy.deepcopy(data.vectorList)
   random.shuffle(vectors)
@@ -31,12 +36,23 @@ def kfold(data : prpr.ProcessedData, k : int, debug = False) -> list[prpr.Proces
   return dataList
 
 def crossvalidation(data : prpr.ProcessedData) -> list[list[list[int]]]:
+  """
+  
+
+  :param data:
+      the data to be operated on
+  
+  :return cm:
+      the total confusion matrix
+  :return foldcmlist:
+      list of confusion matrices for each fold
+  """
   k = 10
-  validationTable = [([0] * data.numberOfClasses) for _ in range(data.numberOfClasses)]
-  foldvalidationtablelist = [None] * k
+  cm = [([0] * data.numberOfClasses) for _ in range(data.numberOfClasses)]
+  foldcmlist = [None] * k
   cleanDataList = kfold(data, k)
   for x in range(0, k):
-    foldvalidationtable = [([0] * data.numberOfClasses) for _ in range(data.numberOfClasses)]
+    foldcm = [([0] * data.numberOfClasses) for _ in range(data.numberOfClasses)]
     dataList = copy.copy(cleanDataList)
     testData = dataList.pop(x)
     trainingData = mergedata(dataList)
@@ -44,15 +60,14 @@ def crossvalidation(data : prpr.ProcessedData) -> list[list[list[int]]]:
     for vector in testData.vectorList:
       actualClass = vector[-1]
       predictedClass = classifier.classifyLog(vector)
-      foldvalidationtable[predictedClass][actualClass] += 1
-      validationTable[predictedClass][actualClass] += 1
-      foldvalidationtablelist[x] = foldvalidationtable
-  return validationTable, foldvalidationtablelist
+      foldcm[predictedClass][actualClass] += 1
+      cm[predictedClass][actualClass] += 1
+      foldcmlist[x] = foldcm
+  return cm, foldcmlist
 
 def democrossvalidation(data : prpr.ProcessedData):
   k = 10
-  validationTable = [([0] * data.numberOfClasses) for _ in range(data.numberOfClasses)]
-  foldvalidationtablelist = [None] * k
+  cm = [([0] * data.numberOfClasses) for _ in range(data.numberOfClasses)]
   cleanDataList = kfold(data, k)
   dataList = copy.copy(cleanDataList)
   testData = dataList.pop(0)
@@ -61,8 +76,8 @@ def democrossvalidation(data : prpr.ProcessedData):
   for vector in testData.vectorList:
     actualClass = vector[-1]
     predictedClass = classifier.classify(vector)
-    validationTable[predictedClass][actualClass] += 1
-  return validationTable
+    cm[predictedClass][actualClass] += 1
+  return cm
 
 def mergedata(dataList : list[prpr.ProcessedData]) -> prpr.ProcessedData:
   totalData = prpr.ProcessedData("__DEFAULT__")

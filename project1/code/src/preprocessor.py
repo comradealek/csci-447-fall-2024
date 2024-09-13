@@ -4,7 +4,34 @@ import copy
 import pandas as pd
 
 class ProcessedData:
+  """
+  A class used to store processed data
+
+  :attribute numberOfClasses:
+      the number of classes in the data set
+  :attribute numberOfExamples:
+      the number of vectors in the data set
+  :attribute vectorLength:
+      the length of the vectors
+  :attribute vectorList:
+      the vectors in a list format
+  :attribute subvectorLengths:
+      the lengths of the subvectors associated with the preprocessed features
+  :attribute errorcode:
+      flag for if an error ocurrs while processing the file
+  :attribute classnames:
+      string list of names associated with the classes
+  """
   def __init__(self, filename : str):
+    """
+    :param filname: str
+        name of the file that will be loaded
+        When it is __DEFAULT__ then it returns a blank ProcessedData object
+
+    First it will attempt to load a file in the data/ directory with a
+    .pdata extension. If it doesn't find one, then it looks for a file
+    with a .data extension. Failing both, it will fail.
+    """
     self.numberOfClasses = 0
     self.numberOfExamples = 0
     self.vectorLength = 0
@@ -38,11 +65,22 @@ class ProcessedData:
     self.vectorLength = len(self.vectorList[0])
   
   def printData(self):
+    """
+    Prints the data in the vectorList vector by vector
+    """
     for vector in self.vectorList:
       print(vector)
     pass
   
   def writetofile(self, path):
+    """
+    Writes the data in the ProcessedData class into a .pdata file to be read 
+    at a later time. This format is read by the loadpdata method
+
+    :param path: str
+        the name of the file without extension or directory. The path and 
+        extension are added automatically
+    """
     f = open(path, "w")
     #copy the subvector data
     f.write(str(self.classNames[0]))
@@ -63,6 +101,12 @@ class ProcessedData:
     pass
   
   def loadpdata(self, file: io.TextIOWrapper):
+    """
+    Loads the data from a formatted pdata file
+
+    :param file: io.TextIOWrapper
+        The file to be read for the method
+    """
     #get the class names
     line = file.readline()
     line = line.strip()
@@ -102,6 +146,10 @@ class ProcessedData:
     pass
   
   def processfile(self, file: io.TextIOWrapper, classColumnNum = None, columnCodes = None, missingAttribFlag = None, demo=False):
+    """
+    Loads the data from an already opened file. If the optional values aren't
+    provided 
+    """
     #extract the column count from the data file
     line = str(file.readline())
     line = line.strip()
@@ -277,9 +325,21 @@ class ProcessedData:
     pass
   
   def shuffleVectors(self):
+    """
+    shuffles the vectors in the list
+    """
     random.shuffle(self.vectorList)
 
 def shuffleElements(data : ProcessedData, factor : float) -> ProcessedData:
+  """
+  Shuffles some factor of the elements without altering the data and returns 
+  a new ProcessedData object
+
+  :param data:
+      the data that will be used to create the new modified data set
+  :param factor:
+      the factor of the elements that will be shuffled within the data set
+  """
   #initialize the new data and copy over everything from the data
   newData = ProcessedData("__DEFAULT__")
   newData.subvectorLengths = copy.copy(data.subvectorLengths)
@@ -311,4 +371,7 @@ def shuffleElements(data : ProcessedData, factor : float) -> ProcessedData:
   pass
 
 def blankData() -> ProcessedData:
+  """
+  Easy way to get a blank ProcessedData object
+  """
   return ProcessedData("__DEFAULT__")
