@@ -10,7 +10,7 @@ def zeroOneLoss(table : list[list[int]]) -> float:
         n += table[x][y]
     loss = (n - h) / n
   except:
-    loss = -1
+    loss = 0
   return loss
 
 def microPrecision(table : list[list[int]]) -> float:
@@ -22,7 +22,7 @@ def microPrecision(table : list[list[int]]) -> float:
       tpfp += sum(table[x])
     loss = tp / tpfp
   except:
-    loss = -1
+    loss = 0
   return loss
 
 def microRecall(table : list[list[int]]) -> float:
@@ -35,7 +35,7 @@ def microRecall(table : list[list[int]]) -> float:
         tpfn += table[y][x]
     loss = tp / tpfn
   except:
-    loss = -1
+    loss = 0
   return loss
 
 def macroPrecision(table : list[list[int]]) -> float:
@@ -45,7 +45,7 @@ def macroPrecision(table : list[list[int]]) -> float:
       loss += (table[x][x] / sum(table[x]))
     loss = loss / len(table)
   except:
-    loss = -1
+    loss = 0
   return loss
 
 def macroRecall(table : list[list[int]]) -> float:
@@ -59,20 +59,20 @@ def macroRecall(table : list[list[int]]) -> float:
       loss += (tp / tpfn)
     loss = loss / len(table)
   except:
-    return -1
+    return 0
   return loss
 
 def macroFmeasure(table : list[list[int]]) -> float:
   precision = macroPrecision(table)
   recall = macroPrecision(table)
-  if precision < 0 or recall < 0:
-    fmeasure = -1
-  else:
+  try:
     fmeasure = 2 * (precision * recall) / (precision + recall)
+  except:
+    fmeasure = 0
   return fmeasure
 
 def printMetrics(table : list[list[int]]):
-  print(f'{"Precision:":11} {macroPrecision(table)}')
-  print(f'{"Recall:":11} {macroRecall(table)}')
-  print(f'{"Zero-One:":11} {zeroOneLoss(table)}')
-  print(f'{"F Measure:":11} {macroFmeasure(table)}')
+  print(f'{"Precision:":11} {macroPrecision(table):.4f}')
+  print(f'{"Recall:":11} {macroRecall(table):.4f}')
+  print(f'{"Zero-One:":11} {zeroOneLoss(table):.4f}')
+  print(f'{"F Measure:":11} {macroFmeasure(table):.4f}')

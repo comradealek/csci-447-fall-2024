@@ -30,19 +30,38 @@ def kfold(data : prpr.ProcessedData, k : int, debug = False) -> list[prpr.Proces
     dataList.append(chunk)
   return dataList
 
-def crossvalidation(data : prpr.ProcessedData) -> list[list[int]]:
+def crossvalidation(data : prpr.ProcessedData) -> list[list[list[int]]]:
   k = 10
   validationTable = [([0] * data.numberOfClasses) for _ in range(data.numberOfClasses)]
+  foldvalidationtablelist = [None] * k
   cleanDataList = kfold(data, k)
   for x in range(0, k):
+    foldvalidationtable = [([0] * data.numberOfClasses) for _ in range(data.numberOfClasses)]
     dataList = copy.copy(cleanDataList)
     testData = dataList.pop(x)
     trainingData = mergedata(dataList)
     classifier = tr.Classifier(trainingData)
     for vector in testData.vectorList:
       actualClass = vector[-1]
-      predictedClass = classifier.classify(vector)
+      predictedClass = classifier.classifyLog(vector)
+      foldvalidationtable[predictedClass][actualClass] += 1
       validationTable[predictedClass][actualClass] += 1
+      foldvalidationtablelist[x] = foldvalidationtable
+  return validationTable, foldvalidationtablelist
+
+def democrossvalidation(data : prpr.ProcessedData):
+  k = 10
+  validationTable = [([0] * data.numberOfClasses) for _ in range(data.numberOfClasses)]
+  foldvalidationtablelist = [None] * k
+  cleanDataList = kfold(data, k)
+  dataList = copy.copy(cleanDataList)
+  testData = dataList.pop(0)
+  trainingData = mergedata(dataList)
+  classifier = tr.Classifier(trainingData)
+  for vector in testData.vectorList:
+    actualClass = vector[-1]
+    predictedClass = classifier.classify(vector)
+    validationTable[predictedClass][actualClass] += 1
   return validationTable
 
 def mergedata(dataList : list[prpr.ProcessedData]) -> prpr.ProcessedData:
@@ -74,3 +93,25 @@ def printTable(data : prpr.ProcessedData, table : list[list[int]]):
       fstr += f',{table[x][y]:>{numL + 1}}'
     fstr += ']'
     print(fstr)
+  print()
+
+def printTableList(data : prpr.ProcessedData, tableList : list[list[list[int]]]):
+  l = 0
+  for name in data.classNames:
+    if l < len(name):
+      l = len(name)
+  numL = 0
+  for table in tableList:
+    for row in table:
+      for val in row:
+        n = int(np.ceil(np.log10(val + 1)))
+        if n > numL:
+          numL = n
+    for x in range(len(table)):
+      fstr = f'{(str(data.classNames[x]) + ":"):<{l + 2}} ['
+      fstr += f'{table[x][0]:>{numL}}'
+      for y in range(1, len(table[x])):
+        fstr += f',{table[x][y]:>{numL + 1}}'
+      fstr += ']'
+      print(fstr)
+    print()

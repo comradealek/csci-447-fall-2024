@@ -1,0 +1,93 @@
+Results for breast-cancer-wisconsin:
+2:  [444,  15]
+4:  [ 14, 226]
+Precision:  0.9545
+Recall:     0.9536
+Zero-One:   0.0415
+F Measure:  0.9545
+
+Results for noise modified breast-cancer-wisconsin:
+2:  [442,  20]
+4:  [ 16, 221]
+Precision:  0.9446
+Recall:     0.9410
+Zero-One:   0.0515
+F Measure:  0.9446
+
+Results for glass:
+1:  [53, 21,  9,  0,  1,  2]
+2:  [17, 54,  8, 10,  3,  4]
+3:  [ 0,  0,  0,  0,  0,  0]
+5:  [ 0,  0,  0,  0,  0,  0]
+6:  [ 0,  0,  0,  0,  0,  0]
+7:  [ 0,  1,  0,  3,  5, 23]
+Precision:  -1.0000
+Recall:     0.3768
+Zero-One:   0.3925
+F Measure:  -1.0000
+
+Results for noise modified glass:
+1:  [51, 27,  9,  0,  1,  3]
+2:  [19, 47,  8,  9,  4,  4]
+3:  [ 0,  0,  0,  0,  0,  0]
+5:  [ 0,  0,  0,  0,  0,  0]
+6:  [ 0,  0,  0,  0,  0,  0]
+7:  [ 0,  2,  0,  4,  4, 22]
+Precision:  -1.0000
+Recall:     0.3509
+Zero-One:   0.4393
+F Measure:  -1.0000
+
+Results for house-votes-84:
+democrat:    [238,  15]
+republican:  [ 29, 153]
+Precision:  0.8907
+Recall:     0.9011
+Zero-One:   0.1011
+F Measure:  0.8907
+
+Results for noise modified house-votes-84:
+democrat:    [240,  13]
+republican:  [ 27, 155]
+Precision:  0.9001
+Recall:     0.9107
+Zero-One:   0.0920
+F Measure:  0.9001
+
+Results for iris:
+Iris-setosa:      [48,  0,  0]
+Iris-versicolor:  [ 2, 43,  8]
+Iris-virginica:   [ 0,  7, 42]
+Precision:  0.8895
+Recall:     0.8867
+Zero-One:   0.1133
+F Measure:  0.8895
+
+Results for noise modified iris:
+Iris-setosa:      [45,  1,  0]
+Iris-versicolor:  [ 5, 46,  9]
+Iris-virginica:   [ 0,  3, 41]
+Precision:  0.8922
+Recall:     0.8800
+Zero-One:   0.1200
+F Measure:  0.8922
+
+Results for soybean-small:
+D1:  [10,  0,  0,  0]
+D2:  [ 0, 10,  0,  0]
+D3:  [ 0,  0,  9,  0]
+D4:  [ 0,  0,  1, 17]
+Precision:  0.9861
+Recall:     0.9750
+Zero-One:   0.0213
+F Measure:  0.9861
+
+Results for noise modified soybean-small:
+D1:  [ 9,  0,  0,  0]
+D2:  [ 0,  7,  0,  0]
+D3:  [ 0,  0,  4,  0]
+D4:  [ 1,  3,  6, 17]
+Precision:  0.9074
+Recall:     0.7500
+Zero-One:   0.2128
+F Measure:  0.9074

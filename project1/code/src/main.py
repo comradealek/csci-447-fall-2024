@@ -22,18 +22,39 @@ def test(selection):
   kfxv.printTable(testData, validationTable)
   ev.printMetrics(validationTable)
 
-def printBarChart(labels, data, noisedata, title=None):
-  x = np.arange(len(labels))
-  width = 0.25
-  plt.bar(x - (width/2), data, width)
-  plt.bar(x + (width / 2), noisedata, width)
-  plt.xticks(x, labels)
+def demo():
+  data = prpr.blankData()
+  print("\033c")
+  input()
+  print("\033c")
+  data.processfile(open("./data/iris.data", "r"), classColumnNum=5, columnCodes=[0, 0, 0, 0, 2], missingAttribFlag="", demo=True)
+  input()
+  print("\033c")
+  noisedata = prpr.shuffleElements(data, 0.30)
+  classifier = tr.Classifier(data)
+  classifier.printTable()
+  input()
+  classifier.printWeightedTable()
+  input()
+  print("\033c")
+  cm = kfxv.democrossvalidation(data)
+  cmwn = kfxv.democrossvalidation(noisedata)
+  print("Confusion matrix for iris data:")
+  kfxv.printTable(data, cm)
+  print("Performance metrics for iris data:")
+  ev.printMetrics(cm)
+  print()
+  print("Confusion matrix for iris data with noise:")
+  kfxv.printTable(data, cmwn)
+  print("Performance metrics for iris data with noise:")
+  ev.printMetrics(cmwn)
+  input()
+  print("\033c")
+
+def printBoxPlot(labels, data, noisedata, title=None):
+  total = data + noisedata
+  plt.boxplot(total, positions=[1, 2, 3, 4, 5, 7, 8 ,9 ,10 ,11], tick_labels=(labels+labels))
   plt.title(title)
-  plt.legend(["clean", "noisy"])
-  plt.xlabel("Data Sets")
-  plt.ylim([0, 1])
-  plt.rcParams["figure.figsize"] = (8, 6)
-  #plt.xkcd()
   plt.show()
 
 def fulltest():
@@ -44,7 +65,7 @@ def fulltest():
 
   columnCodeList = [
     [-1] + [0 for _ in range(9)] + [2],
-    [-1] + [0 for _ in range(5)] + [-1, -1] + [0, 0] + [2],
+    [-1] + [0 for _ in range(5)] + [-1, -1, -1, 0] + [2],
     [2] + [1 for _ in range(16)],
     [0 for _ in range(4)] + [2],
     [1 for _ in range(10)] + [-1, 1] + [-1 for _ in range(7)] + [1 for _ in range(9)] + [-1 for _ in range(6)] + [1, 2]
@@ -58,16 +79,18 @@ def fulltest():
     ""
   ]
   
-  precisionlist = [0.0 for _ in range(len(namelist))]
-  recalllist =    [0.0 for _ in range(len(namelist))]
-  zeroonelist =   [0.0 for _ in range(len(namelist))]
-  fmeasurelist =  [0.0 for _ in range(len(namelist))]
-  noiseprecisionlist = [0.0 for _ in range(len(namelist))]
-  noiserecalllist =    [0.0 for _ in range(len(namelist))]
-  noisezeroonelist =   [0.0 for _ in range(len(namelist))]
-  noisefmeasurelist =  [0.0 for _ in range(len(namelist))]
+  precisionlist = [[] for _ in range(len(namelist))]
+  recalllist =    [[] for _ in range(len(namelist))]
+  zeroonelist =   [[] for _ in range(len(namelist))]
+  fmeasurelist =  [[] for _ in range(len(namelist))]
+  noiseprecisionlist = [[] for _ in range(len(namelist))]
+  noiserecalllist =    [[] for _ in range(len(namelist))]
+  noisezeroonelist =   [[] for _ in range(len(namelist))]
+  noisefmeasurelist =  [[] for _ in range(len(namelist))]
   for i in range(len(namelist)):
     data = prpr.blankData()
+    
+    #process the data in the file
     try:
       data.loadpdata(open("./data/" + namelist[i] + ".pdata", "r"))
     except:
@@ -78,33 +101,42 @@ def fulltest():
         missingAttribFlag=missingAttribList[i]
       )
       data.writetofile(namelist[i] + ".pdata")
+    
+    #introduce noise
     noisedata = prpr.shuffleElements(data, 0.10)
-    table = kfxv.crossvalidation(data)
-    noisetable = kfxv.crossvalidation(noisedata)
+    validationtable, tableList = kfxv.crossvalidation(data)
+    noisevalidationtable, noisetableList = kfxv.crossvalidation(noisedata)
+
+    for j in range(len(tableList)):
+      precisionlist[i].append(ev.macroPrecision(tableList[j]))
+      noiseprecisionlist[i].append(ev.macroPrecision(noisetableList[j]))
+      recalllist[i].append(ev.macroRecall(tableList[j]))
+      noiserecalllist[i].append(ev.macroRecall(noisetableList[j]))
+      zeroonelist[i].append(ev.zeroOneLoss(tableList[j]))
+      noisezeroonelist[i].append(ev.zeroOneLoss(noisetableList[j]))
+      fmeasurelist[i].append(ev.macroFmeasure(tableList[j]))
+      noisefmeasurelist[i].append(ev.macroFmeasure(noisetableList[j]))
 
     print("Results for " + namelist[i] + ":")
-    kfxv.printTable(data, table)
-    ev.printMetrics(table)
+    kfxv.printTable(data, validationtable)
+    print(np.mean(precisionlist[i]))
+    print(np.mean(recalllist[i]))
+    print(np.mean(zeroonelist[i]))
+    print(np.mean(fmeasurelist[i]))
     print()
     print("Results for noise modified " + namelist[i] + ":")
-    kfxv.printTable(noisedata, noisetable)
-    ev.printMetrics(noisetable)
+    kfxv.printTable(noisedata, noisevalidationtable)
+    print(np.mean(noiseprecisionlist[i]))
+    print(np.mean(noiserecalllist[i]))
+    print(np.mean(noisezeroonelist[i]))
+    print(np.mean(noisefmeasurelist[i]))
     print()
-
-    precisionlist[i] = ev.macroPrecision(table)
-    noiseprecisionlist[i] = ev.macroPrecision(noisetable)
-    recalllist[i] = ev.macroRecall(table)
-    noiserecalllist[i] = ev.macroRecall(noisetable)
-    zeroonelist[i] = ev.zeroOneLoss(table)
-    noisezeroonelist[i] = ev.zeroOneLoss(noisetable)
-    fmeasurelist[i] = ev.macroFmeasure(table)
-    noisefmeasurelist[i] = ev.macroFmeasure(noisetable)
   
   #Create the bar chart
-  printBarChart(namelist, zeroonelist, noisezeroonelist, title="0-1 Loss")
-  printBarChart(namelist, precisionlist, noiseprecisionlist, title="Precision")
-  printBarChart(namelist, recalllist, noiserecalllist, title="Recall")
-  printBarChart(namelist, fmeasurelist, noisefmeasurelist, "F Measure")
+  printBoxPlot(namelist, zeroonelist, noisezeroonelist, title="0-1 Loss")
+  printBoxPlot(namelist, precisionlist, noiseprecisionlist, title="Precision")
+  printBoxPlot(namelist, recalllist, noiserecalllist, title="Recall")
+  printBoxPlot(namelist, fmeasurelist, noisefmeasurelist, title="F Measure")
   return
 
 code = 0
@@ -116,5 +148,8 @@ while code == 0:
     exit()
   elif selection == "fulltest":
     fulltest()
+  elif selection == "demo":
+    demo()
+    exit()
   else:
     test(selection)

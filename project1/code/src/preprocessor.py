@@ -1,6 +1,7 @@
 import io
 import random
 import copy
+import pandas as pd
 
 class ProcessedData:
   def __init__(self, filename : str):
@@ -100,7 +101,7 @@ class ProcessedData:
     self.vectorLength = len(self.vectorList[0])
     pass
   
-  def processfile(self, file: io.TextIOWrapper, classColumnNum = None, columnCodes = None, missingAttribFlag = None):
+  def processfile(self, file: io.TextIOWrapper, classColumnNum = None, columnCodes = None, missingAttribFlag = None, demo=False):
     #extract the column count from the data file
     line = str(file.readline())
     line = line.strip()
@@ -226,22 +227,16 @@ class ProcessedData:
     x = 0
     for code in columnCodes:
       if code == 0: #continuous values will get binned based on quartile
-        for y in range(0, len(columnDataList[x])):
-          subvectorLength = 4
+        subvectorLength = 4
+        li = pd.qcut(columnDataList[x], q=subvectorLength, labels=False, duplicates='drop')
+        if x == 0 and demo:
+          democolumn = []
+        for y in range(len(li)):
           subvector = [0] * subvectorLength
-          if columnDataList[x][y] <= columnEncoder[x][0]:
-            subvector[0] = 1
-            pass
-          elif columnDataList[x][y] <= columnEncoder[x][1]:
-            subvector[1] = 1
-            pass
-          elif columnDataList[x][y] <= columnEncoder[x][2]:
-            subvector[2] = 1
-            pass
-          else:
-            subvector[3] = 1
-            pass
+          subvector[li[y]] = 1
           self.vectorList[y].extend(subvector)
+          if x == 0 and demo:
+            democolumn.append(subvector)
           pass
         self.subvectorLengths.append(subvectorLength)
         x += 1
@@ -263,6 +258,11 @@ class ProcessedData:
         pass
       if code == -1:
         pass
+    
+    #code for printing the demo
+    if demo:
+      for i in range(30):
+        print(f'{str(columnDataList[0][int(i * len(democolumn) / 30)]):2} -> {democolumn[int(i * len(democolumn) / 30)]}')
     
     #this is where we assign values to the class column
     x = classColumnNum - (columnCodes.count(-1) + 1)
